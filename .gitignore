@@ -1,0 +1,36 @@
+# Dependencies
+**/node_modules/
+**/vendor/
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.production
+**/.env.backup
+!**/.env.example
+
+# Next.js
+**/.next/
+**/out/
+**/.vercel/
+*.tsbuildinfo
+
+# Laravel
+api/storage/*.key
+api/storage/logs/*.log
+api/storage/pail/
+api/public/storage
+api/public/hot
+api/public/build
+
+# Cache & Testing
+.phpunit.result.cache
+.phpunit.cache/
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.log
