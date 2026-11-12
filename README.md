@@ -1,70 +1,171 @@
 # ComplyShield — AML / CFT Compliance SaaS
 
-A multi-tenant AML compliance web app for DNFBP businesses (jewellery & precious metals, real estate, insurance, audit firms), modelled on the Scantero360 product. Every subscriber company gets its own workspace, customers, screening data and audit trail.
+A modern, multi-tenant AML / CFT compliance web application designed for DNFBP businesses (jewellery & precious metals, real estate, insurance, audit firms), inspired by international regulatory compliance standards and the UAE goAML framework. Every subscriber company gets an isolated workspace, customer registry, screening engine, transaction monitoring, and audit trail.
 
-- **Frontend:** Next.js + Tailwind CSS (`web/`) — light theme, Plus Jakarta Sans + Inter
-- **Backend:** Laravel API + Sanctum (`api/`)
-- **Database:** MySQL / MariaDB
+- **Frontend:** Next.js 16 + React 19 + Tailwind CSS (`web/`) — Deployed on Vercel
+- **Backend:** Laravel 11/13 REST API + Laravel Sanctum (`api/`) — Deployed on Web Hosting / VPS
+- **Database:** MySQL / MariaDB (Multi-tenant scoped)
 
-## What's inside
+---
 
-- **Dashboard** — customers, KYC waiting, open alerts, cases, high-risk customers, screening volume, KYC pipeline, pipeline status, recent audited activity
-- **Customers** — 3-step add wizard (details → documents → review) with phone QR-scan popup, ID document records with a 6-point verification checklist, customer profile with a visual compliance journey, KYC approve/reject (MLRO/Owner), automatic screening on save, automatic risk score
-- **Screening** — Name Checker + Test screening, Bulk screening (CSV), Screening Configuration (OpenSanctions + OFAC/EU/UN/UK providers), Screening Alerts with decision workflow (false positive / confirm match / escalate to case), Adverse Media, Screening Monitor
-- **Transaction Monitoring** — transactions ledger, 6 built-in rules (cash threshold AED 55,000, structuring, high value, rapid succession, high-risk customer, dormant spike), alerts with decisions, editable rules
-- **Cases & Reports** — investigation cases, STR/SAR drafts generated from a case with a goAML-format XML export, MLRO mark-as-filed
-- **Risk** — EWRA (enterprise-wide risk assessment) with 5 scored dimensions and residual risk, Risk Register (high/severe customers)
-- **Settings** — company profile, users & roles (Owner / MLRO / Officer / Viewer), Customer Form Builder, subscription & OpenSanctions usage
-- **SaaS** — full tenant isolation: every record is scoped to the logged-in company
+## What's Inside
 
-## Run it locally
+1. **Dashboard**
+   - Real-time compliance health, KYC pipeline, pending alerts, active cases, high-risk exposure, and audited activity feeds.
+2. **Customer Due Diligence (CDD / KYC)**
+   - 3-step customer onboarding wizard with document verification checklist (Emirates ID, Passport, Trade License, etc.).
+   - Visual compliance journey, automated risk score calculation (0–100 scale: Low, Medium, High, Severe), and EDD tracking.
+3. **Automated Sanctions Screening**
+   - Real-time screening against local watchlists (OFAC SDN, EU, UN, UK, UAE lists, PEPs) with fuzzy/phonetic matching.
+   - Live OpenSanctions API integration with per-company credits tracking.
+   - Batch CSV screening, name checker, and screening alert review/escalation workflow.
+4. **Transaction Monitoring & Validation Exceptions**
+   - Real-time rules engine: Cash Threshold (≥ AED 55,000), Structuring / Split Cash, High-Risk Customer activity, High Value, and Rapid Succession.
+   - Dedicated **Validation Exceptions** audit workspace with KPI overview, multi-parameter filtering, rule trigger explanations, and direct alert decisions (Close benign / Escalate to Case).
+5. **Cases & goAML STR/SAR Reporting**
+   - Investigation case management for AML compliance officers and MLROs.
+   - Suspicious Transaction Report (STR) drafting with automated UAE goAML XML export.
+6. **Enterprise-Wide Risk Assessment (EWRA)**
+   - 5-factor risk scoring (Customers, Products, Channels, Geography, Counterparties) with residual risk computation.
+7. **Form Builder & Company Settings**
+   - Dynamic custom onboarding fields, role-based access control (Owner, MLRO, Officer, Viewer), and API usage monitoring.
 
-Requirements: PHP 8.3+, Composer, Node 20+, MySQL/MariaDB.
+---
 
-```bash
-# 1) Database
-mysql -uroot -e "CREATE DATABASE complyshield; CREATE USER 'complyshield'@'127.0.0.1' IDENTIFIED BY 'cs_dev_2026_local'; GRANT ALL ON complyshield.* TO 'complyshield'@'127.0.0.1';"
+## Local Development Setup
 
-# 2) Backend
-cd api
-composer install
-cp .env.example .env   # set DB_DATABASE=complyshield, DB_USERNAME=complyshield, DB_PASSWORD=cs_dev_2026_local
-php artisan key:generate
-php artisan migrate:fresh --seed
-php artisan serve --port=8000
+### Prerequisites
+- PHP 8.3+ (PHP 8.4 recommended)
+- Composer 2.x
+- Node.js 20+ & npm
+- MySQL 8.x
 
-# 3) Frontend (new terminal)
-cd web
-npm install
-npm run build && npm run start   # or: npm run dev
+### 1. Database Setup
+```sql
+CREATE DATABASE aml_compliance CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Open http://localhost:3000
+### 2. Backend Setup (`api/`)
+```bash
+cd api
+composer install
+cp .env.example .env   # Configure DB_DATABASE=aml_compliance, DB_USERNAME, DB_PASSWORD
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve --port=8000
+```
+Backend runs at `http://127.0.0.1:8000`.
 
-## Demo accounts (seeded workspace: Al Noor Gold & Jewellery LLC, Dubai)
+### 3. Frontend Setup (`web/`)
+```bash
+cd web
+npm install
+# web/.env.local contains: NEXT_PUBLIC_API_URL=http://localhost:8000/api
+npm run dev
+```
+Frontend runs at `http://localhost:3000`.
 
-| Role    | Email                 | Password |
-| ------- | --------------------- | -------- |
-| Owner   | owner@alnoor.example  | password |
-| MLRO    | mlro@alnoor.example   | password |
-| Officer | officer@alnoor.example| password |
+---
 
-A second tenant (Palm Gate Real Estate LLC) is seeded to prove tenant isolation.
+## Demo Credentials (Seeded Workspace: Al Noor Gold & Jewellery LLC)
 
-## OpenSanctions live data
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Owner** | `owner@alnoor.example` | `password` |
+| **MLRO** (Compliance Manager) | `mlro@alnoor.example` | `password` |
+| **Officer** | `officer@alnoor.example` | `password` |
+| **Palm Gate Real Estate (Tenant 2)** | `owner@palmgate.example` | `password` |
 
-Screening works out of the box against the built-in local watchlist (OFAC, EU, UN, UK and PEP entries) with a fuzzy/phonetic matching engine. For live OpenSanctions data:
+---
 
-1. Sign up at https://www.opensanctions.org — a business email starts a free trial API key.
-2. In the app: **AML Screening → Screening Configuration → OpenSanctions → paste the API key → Save**.
-3. From that moment, checks run in real time against OpenSanctions (each call is counted under Settings → Subscription & Usage). Without a key the app keeps using the local lists — nothing breaks.
+## Production Deployment Guide
 
-**Deployment-wide key (for the operator):** instead of pasting a key per company, set `OPENSANCTIONS_API_KEY` once in `api/.env` and restart the API. Every company then screens live with that key, unless a company saves its own key in Screening Configuration — the company's own key and its on/off toggle always win.
+### A. Frontend Deployment (Vercel)
+The Next.js frontend is designed to deploy on Vercel from the monorepo root:
+1. Import repository `prince-84/AML` into Vercel.
+2. In **Project Settings → General**:
+   - **Root Directory:** Set to `web` *(Mandatory)*.
+   - **Framework Preset:** `Next.js`.
+3. In **Environment Variables**:
+   - `NEXT_PUBLIC_API_URL` = `https://your-backend-domain.com/api` (ensure trailing `/api`).
+4. Click **Deploy**.
 
-Note: OpenSanctions' free data licence is non-commercial; a paid licence is required before selling live screening as a service.
+### B. Backend Deployment (Hosting / VPS)
+1. Upload/clone `api/` to hosting document root (e.g. `aml.fsadvisory.ae`).
+2. Point web server root to `api/public`.
+3. Configure `api/.env`:
+   - `APP_ENV=production`, `APP_DEBUG=false`
+   - `APP_URL=https://your-backend-domain.com`
+   - MySQL database connection settings.
+4. Run deployment commands:
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   php artisan key:generate
+   php artisan migrate --force --seed
+   php artisan storage:link
+   php artisan config:cache
+   php artisan route:cache
+   ```
+5. **CORS:** `api/config/cors.php` allows all origins (`*`) for Sanctum Bearer token requests, ensuring Vercel preview and production domains communicate seamlessly with the backend.
 
-## Layout
+---
 
-- `CONTRACT.md` — the full build specification both halves were built against
-- `api/` — Laravel application (migrations, services: ScreeningService, OpenSanctionsService, RiskService, TransactionMonitor, GoAmlService)
-- `web/` — Next.js application
+## Security & Anti-Indexing (NoIndex Policy)
+
+Search engine indexing and crawler discovery are completely disabled across both frontend and backend:
+- **Frontend (`web`):**
+  - `web/public/robots.txt`: Blocks all crawlers (`Disallow: /`).
+  - `web/src/app/layout.tsx`: Root `<meta name="robots" content="noindex, nofollow, noarchive" />`.
+  - `web/next.config.ts` & `web/vercel.json`: Edge-level `X-Robots-Tag: noindex, nofollow, noarchive` headers.
+- **Backend (`api`):**
+  - `api/public/robots.txt`: Disallow all crawlers (`Disallow: /`).
+  - `api/public/.htaccess`: Directory listing disabled (`Options -Indexes`) and `X-Robots-Tag` header enforced.
+  - `api/app/Http/Middleware/NoIndexHeaders.php`: Global middleware appending `X-Robots-Tag: noindex, nofollow, noarchive` on all JSON and web responses.
+  - `api/routes/web.php`: Root path `/` returns an API status JSON instead of public landing pages.
+
+---
+
+## Project Structure
+
+```
+├── AGENTS.md                  # Workflow & agent maintenance rules
+├── CONTRACT.md                # Full functional specification & schema
+├── README.md                  # System documentation & changelog (this file)
+├── .gitignore                 # Root gitignore excluding .env, vendor, node_modules, logs
+│
+├── api/                       # Laravel 11/13 REST API backend
+│   ├── app/
+│   │   ├── Http/Controllers/  # Controllers (Transactions, Customers, Screening, etc.)
+│   │   ├── Http/Middleware/   # Custom middleware (NoIndexHeaders)
+│   │   ├── Models/            # Multi-tenant Eloquent models
+│   │   └── Services/          # AML Engines (Screening, Risk, Monitor, GoAML)
+│   ├── config/cors.php        # CORS configuration
+│   ├── database/              # Migrations and Demo seeders
+│   └── routes/api.php         # Authenticated API endpoints
+│
+└── web/                       # Next.js 16 frontend application
+    ├── public/                # Static assets and robots.txt
+    ├── vercel.json            # Vercel deployment edge headers
+    └── src/
+        ├── app/               # App Router pages and layouts
+        ├── components/        # UI library, Modals, Decision tools, Shell
+        └── lib/               # API client, auth context, types, formatters
+```
+
+---
+
+## Changelog & Recent Updates
+
+### November 12, 2026
+- **CORS Preflight Fix:** Fixed preflight regex crash in `api/config/cors.php` by removing invalid `allowed_origins_patterns` wildcard, allowing full cross-origin Bearer token authentication from Vercel (`*.vercel.app`) to production hosting (`aml.fsadvisory.ae`).
+- **Comprehensive NoIndex Implementation:** Configured complete crawler blocking (`robots.txt`, HTML meta tags, middleware, Apache `.htaccess`, Next.js headers, and `vercel.json`) across both frontend and backend.
+- **Root Documentation & Agent Policy:** Added `AGENTS.md` establishing the mandatory rule to update `README.md` on every change.
+
+### November 11, 2026
+- **Validation Exceptions Workspace:** Upgraded `web/src/app/(app)/transactions/page.tsx` with summary KPI stat cards, multi-parameter rule/status/method filters, readable rule tags (Cash Threshold, Structuring, High-Risk Customer), customer risk badges, and direct alert decision workflows (`TmAlertDecisionModal`).
+- **Backend Search & Analytics:** Added `GET /api/transactions/stats` endpoint and expanded `TransactionController::index` to search across transaction references, item descriptions, and customer names.
+- **Next.js 16 Build Stability:** Removed experimental partial prefetching flags causing dropped segment rendering warnings in Turbopack.
+
+### November 10, 2026
+- Initialized full local development environment, database migrations, and seeded demo accounts.

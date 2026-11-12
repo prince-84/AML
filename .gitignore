@@ -34,4 +34,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.log
+*.zip
+*.sql
+
 
