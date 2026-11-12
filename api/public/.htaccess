@@ -3,6 +3,10 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    <IfModule mod_headers.c>
+        Header set X-Robots-Tag "noindex, nofollow, noarchive"
+    </IfModule>
+
     RewriteEngine On
 
     # Handle Authorization Header
